@@ -14,6 +14,13 @@ def setup_droplet(droplet_ip, droplet_password):
             print("Choosing package maintainer's version for sshd_config...")
             conn.send("\n")
 
+        print("Creating 4GB swap space...")
+        conn.run("fallocate -l 4G /swapfile")
+        conn.run("chmod 600 /swapfile")
+        conn.run("mkswap /swapfile")
+        conn.run("swapon /swapfile")
+        conn.run("echo '/swapfile none swap sw 0 0' >> /etc/fstab")
+
         print("Installing Python3 and pip...")
         conn.run("apt-get install -y python3-pip")
 
@@ -25,7 +32,7 @@ def setup_droplet(droplet_ip, droplet_password):
             conn.run("cp api-keys.example.json api-keys.json")
 
             print("Installing Passivbot requirements...")
-            conn.run("pip3 install -r requirements_liveonly.txt")
+            conn.run("pip3 install -r requirements.txt")
 
         print("Droplet setup completed successfully!")
 
