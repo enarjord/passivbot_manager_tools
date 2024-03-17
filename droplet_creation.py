@@ -2,15 +2,16 @@ import json
 import os
 import random
 import string
+from datetime import datetime
 from dataclasses import asdict, dataclass
 
 import digitalocean
 
 # Replace with your Digital Ocean API token
-TOKEN = "your_digitalocean_api_token"
+TOKEN = "YOUR_TOKEN"
 
 # Initialize the DigitalOcean API client
-client = digitalocean.Client(token=TOKEN)
+manager = digitalocean.Manager(token=TOKEN)
 
 
 # Define the dataclass to store droplet information
@@ -21,18 +22,27 @@ class DropletInfo:
     password: str
 
 
-# Function to generate a random droplet name
 def generate_droplet_name():
     adjectives = ["tiny", "cloudy", "misty", "sunny", "bright", "warm", "cool", "calm"]
     nouns = ["droplet", "instance", "server", "node", "machine", "host", "cloud"]
     adjective = random.choice(adjectives)
     noun = random.choice(nouns)
-    return f"{adjective}-{noun}"
+
+    # Get the current date and time, precise to seconds
+    now = datetime.now()
+    timestamp = now.strftime("%Y%m%d%H%M%S")
+
+    # Generate a random string
+    random_string = "".join(random.choices(string.ascii_lowercase + string.digits, k=8))
+
+    # Combine the adjective, noun, timestamp, and random string
+    unique_name = f"{adjective}-{noun}-{timestamp}-{random_string}"
+    return unique_name
 
 
 # Function to create a new droplet
 def create_droplet():
-    # Generate a random droplet name
+    # Generate a unique droplet name
     droplet_name = generate_droplet_name()
 
     # Create a new Droplet
@@ -45,12 +55,12 @@ def create_droplet():
         backups=False,
         ipv6=False,
         user_data=None,
-        ssh_keys=None,
+        ssh_keys=[],
         monitoring=False,
         vpc_uuid=None,
         tags=None,
     )
-    droplet.create()
+    droplet.create(manager)
 
     # Generate a random password
     password = "".join(random.choices(string.ascii_letters + string.digits, k=12))
